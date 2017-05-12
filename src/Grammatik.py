@@ -32,7 +32,3 @@ class Grammatik(object):
             for regel in group:
                 result = regel.__repr__()
                 print(result)
-            
-            
-        
-        
