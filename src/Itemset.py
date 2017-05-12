@@ -6,8 +6,6 @@ Created on 11.05.2017
 
 class Itemset():
 
-
-
     def __init__(self):
         self.itemSet = []
         
