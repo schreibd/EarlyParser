@@ -21,6 +21,6 @@ class Item():
         '''
     def __repr__(self):
         rechteSeite = list(self.regel.rightSide)
-        rechteSeite.insert(self.dot, "Punkt")
-        rechteSeite.insert(rechteSeite.__len__(), "at"+str(self.start))
+        rechteSeite.insert(self.dot, "•")
+        rechteSeite.insert(rechteSeite.__len__(), "@"+str(self.start))
         return "Regel {0} -> {1}".format(self.regel.leftSide, ' '.join(rechteSeite))

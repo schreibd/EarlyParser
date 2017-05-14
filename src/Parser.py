@@ -3,6 +3,8 @@
 from Item import*
 from Regel import*
 from Itemset import*
+from test.test_getargs2 import PositionalOnlyAndKeywords_TestCase
+from tkinter.constants import CURRENT
 class Parser():
     
     START_SYMBOL = "StartStart"
@@ -12,14 +14,16 @@ class Parser():
         
         #self.wordCount = len(re.findall(r'\w', self.sentence))
         self.letterCount = len(self.sentence) - self.sentence.count(' ')
-        self.itemSetList = []
+        self.itemSetLists = []
         
-        self.completedSetList = []
+        self.completedSetLists = []
         
     def __repr__(self):
-        for item in self.itemSetList:
-            item.__repr__()
-    
+        for item in self.itemSetLists:
+            "Itemset: " + item.__repr__()
+        #for item in self.itemSetLists:
+            #"CompletedSet: " + item.__repr__()
+        
     def initializeParser(self):
         tempSet = Itemset()
         for group in self.grammar.regeln.values():
@@ -27,37 +31,68 @@ class Parser():
                 if rule.leftSide == "S":
                     tempItem = Item(rule, 0, 0)
                     tempSet.addItem(tempItem)
-                    self.itemSetList.append(tempSet)
+                    self.itemSetLists.append(tempSet)
+    
     def parseLoop(self):
         counter = 0
         while counter < self.letterCount:
-            currentItemSet = self.itemSetList[counter]
+            currentItemSet = self.itemSetLists[counter]
             length = len(currentItemSet.itemSet)
             oldLength = 0
             while oldLength < int(length):  
                 self.predict(currentItemSet, counter)
                 ##print("Old length: " + str(oldLength) + " Length: " + str(length))
-                self.__repr__()
                 oldLength = length
                 length = len(currentItemSet.itemSet)
             #self.scan(currentItemSet, counter)
+            self.scan(currentItemSet, counter)
             counter += 1 
     
     def predict(self, currentItemSet, position):
         counter = 0
-        while counter < len(currentItemSet.itemSet):
-            for group in self.grammar.regeln.values():
-                for rule in group:
-                    if rule.leftSide == currentItemSet.itemSet[counter].regel.rightSide:
-                        if rule.leftSide != currentItemSet.itemSet[counter].regel.
+        for group in self.grammar.regeln.values():
+            for rule in group:
+                tempItem = None
+                for item in currentItemSet.itemSet:
+                    if item.regel.rightSide == rule.rightSide and item.regel.leftSide == rule.leftSide:
+                        tempItem = None
+                        break
+                    if rule.leftSide == item.regel.rightSide:
                         tempItem = Item(rule, 0, position)
-                        self.itemSetList[position].addItem(tempItem)
-            counter += 1
+                if tempItem != None:
+                    self.itemSetLists[position].addItem(tempItem)
+    
+    def scan(self, currentItemSet, position):
+        symbol = self.sentence[position+1]
+        for item in self.itemSetLists[position].itemSet:
+            if item.regel.rightSide == symbol:
+                tempItem = Item(item.regel, item.dot + 1, position)
+                if self.completedSetLists  and self.completedSetLists[position] != None:  
+                    self.completedSetLists.append(tempItem)
+                else:
+                    tempSet = Itemset()
+                    tempSet.addItem(tempItem)
+                    self.completedSetLists.append(tempSet)
+    
+    
+    
     #def scan(self, currentItemSet, position):    
         #for group in self.grammar.regeln.values():
             #for rule in group:
-                #if str(self.itemSetList[position].itemSet[0].regel.rightSide) == rule.leftSide:                   
+                #if str(self.itemSetLists[position].itemSet[0].regel.rightSide) == rule.leftSide:                   
                     #newItem = Item(rule, 0, position)
-                    #self.itemSetList[position+1].addItem(newItem)
+                    #self.itemSetLists[position+1].addItem(newItem)    
+                    
+        #while counter < len(currentItemSet.itemSet):
+            #for group in self.grammar.regeln.values():
+                #for rule in group:
+                    #if rule.leftSide == currentItemSet.itemSet[counter].regel.rightSide:
+                        #tempItem = Item(rule, 0, position)
+                        #self.itemSetLists[position].addItem(tempItem)
+            #counter += 1
+            
+            
+            
+    
 
     #def complete(self):

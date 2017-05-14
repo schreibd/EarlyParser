@@ -12,15 +12,15 @@ class LetsTryIt(object):
 
     def __init__(self, name):
         
-        #self.name = name
-        #self.count = len(self.name) - self.name.count(' ')
-        #print(self.count)
         self.name = name
-        self.sentence = self.name[:0] + " " + self.name[0:]
-
-    
-        '''
-        Constructor
-        '''
-    def __repr__(self,):
-        print(len(self.sentence))
+        
+    def __repr__(self, position):
+        print(self.name[position + 1])
+        
+    def changeName(self, name):
+        self.name = name
+        
+    def compare(self):
+        if self.name == None:
+            print("Ja kann man")
+        
