@@ -3,11 +3,11 @@
 from Item import*
 from Regel import*
 from Itemset import*
-from test.test_getargs2 import PositionalOnlyAndKeywords_TestCase
-from tkinter.constants import CURRENT
+
 class Parser():
     
     START_SYMBOL = "StartStart"
+    
     def __init__(self, grammar, sentence):
         self.grammar = grammar
         self.sentence = sentence[:0] + " " + sentence[0:]
@@ -16,14 +16,13 @@ class Parser():
         self.letterCount = len(self.sentence) - self.sentence.count(' ')
         self.itemSetLists = []
         
-        self.completedSetLists = []
-        
+        self.completedSetLists = []     
     def __repr__(self):
         for item in self.itemSetLists:
-            "Itemset: " + item.__repr__()
-        #for item in self.itemSetLists:
-            #"CompletedSet: " + item.__repr__()
-        
+            item.__repr__()
+        for item in self.completedSetLists:
+            item.__repr__()   
+    
     def initializeParser(self):
         tempSet = Itemset()
         for group in self.grammar.regeln.values():
@@ -31,7 +30,7 @@ class Parser():
                 if rule.leftSide == "S":
                     tempItem = Item(rule, 0, 0)
                     tempSet.addItem(tempItem)
-                    self.itemSetLists.append(tempSet)
+                    self.itemSetLists.append(tempSet)   
     
     def parseLoop(self):
         counter = 0
@@ -46,7 +45,7 @@ class Parser():
                 length = len(currentItemSet.itemSet)
             #self.scan(currentItemSet, counter)
             self.scan(currentItemSet, counter)
-            counter += 1 
+            counter += 1    
     
     def predict(self, currentItemSet, position):
         counter = 0
@@ -60,7 +59,7 @@ class Parser():
                     if rule.leftSide == item.regel.rightSide:
                         tempItem = Item(rule, 0, position)
                 if tempItem != None:
-                    self.itemSetLists[position].addItem(tempItem)
+                    self.itemSetLists[position].addItem(tempItem)   
     
     def scan(self, currentItemSet, position):
         symbol = self.sentence[position+1]
