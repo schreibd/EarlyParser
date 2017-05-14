@@ -7,9 +7,6 @@ Created on 10.05.2017
 
 class Grammatik(object):
     
-    import sys
-    
-    
     def __init__(self):
         #Regeln ist ein Dictionary geordnet nach Nichtterminalen
         #Key = Linke Seite einer Regel

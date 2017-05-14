@@ -12,12 +12,15 @@ class LetsTryIt(object):
 
     def __init__(self, name):
         
+        #self.name = name
+        #self.count = len(self.name) - self.name.count(' ')
+        #print(self.count)
         self.name = name
-        self.count = len(self.name) - self.name.count(' ')
-        print(self.count)
-    
+        self.sentence = self.name[:0] + " " + self.name[0:]
+
     
         '''
         Constructor
         '''
-        
+    def __repr__(self,):
+        print(len(self.sentence))

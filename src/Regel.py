@@ -19,5 +19,5 @@ class Regel():
         return len(self.rightSide) 
     #Ausgabe der Regel im Format LinkeSeite -> RechteSeite      
     def __repr__(self):
-        return "Regel {0} -> {1}".format(self.leftSide, ' '.join(self.rightSide))
+        return "Regel {0} -> {1}".format(self.leftSide, ''.join(self.rightSide))
     
