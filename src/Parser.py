@@ -42,26 +42,36 @@ class Parser():
             oldLength = 0
             while oldLength < int(length):  
                 self.predict(currentItemSet, counter)
-                ##print("Old length: " + str(oldLength) + " Length: " + str(length))
+                print("Old length: " + str(oldLength) + " Length: " + str(length))
                 oldLength = length
                 length = len(currentItemSet.itemSet)
             #self.scan(currentItemSet, counter)
             self.scan(currentItemSet, counter)
+            completedLength = len(self.completedSetLists[counter].itemSet)
+            oCompletedLength = completedLength
+            while oCompletedLength < int(completedLength):
+                self.complete(currentItemSet, counter)
+                CompletedLength = completedLength
+                completedLength = len(self.completedSetLists[counter].itemSet)
             counter += 1    
     
     def predict(self, currentItemSet, position):
-        counter = 0
         for group in self.grammar.regeln.values():
             for rule in group:
                 tempItem = None
                 for item in currentItemSet.itemSet:
-                    if item.regel.rightSide == rule.rightSide and item.regel.leftSide == rule.leftSide:
+                    if rule == item.regel:
+                    #if item.regel.rightSide == rule.rightSide and item.regel.leftSide == rule.leftSide:
                         tempItem = None
                         break
                     if rule.leftSide == item.regel.rightSide:
                         tempItem = Item(rule, 0, position)
-                if tempItem != None:
+                if tempItem != None and self.completedSetLists[position] != None:
                     self.itemSetLists[position].addItem(tempItem)   
+                else:
+                    tempSet = Itemset().addItem(tempItem)
+                    self.completedSetLists.append(tempSet)
+                    
     
     def scan(self, currentItemSet, position):
         symbol = self.sentence[position+1]
@@ -76,7 +86,11 @@ class Parser():
                     self.completedSetLists.append(tempSet)
     
     
-    
+    def complete(self, currentItemSet, position):
+        for item in self.completedSetLists.itemSet:
+            for item2 in currentItemSet[position].itemSet:
+                if item.regel.leftSide == item2.regel.rightSide:
+                    self.completedSetLists[position].append(Item(item2.regel), item.dot + 1, position)
     #def scan(self, currentItemSet, position):    
         #for group in self.grammar.regeln.values():
             #for rule in group:

@@ -21,3 +21,9 @@ class Regel():
     def __repr__(self):
         return "Regel {0} -> {1}".format(self.leftSide, ''.join(self.rightSide))
     
+    def __eq__(self, other):
+        if self.leftSide == other.leftSide:
+            if self.rightSide == other.rightSide:
+                return True
+        return False
+    
