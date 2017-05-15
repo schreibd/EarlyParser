@@ -14,8 +14,9 @@ class Parser():
         
         #self.wordCount = len(re.findall(r'\w', self.sentence))
         self.letterCount = len(self.sentence) - self.sentence.count(' ')
+        #Liste der Itemsets (active und prediction zusammengefasst)
         self.itemSetLists = []
-        
+        #Liste der Itemsets (completed)
         self.completedSetLists = []     
     def __repr__(self):
         for item in self.itemSetLists:
@@ -23,6 +24,7 @@ class Parser():
         for item in self.completedSetLists:
             item.__repr__()   
     
+    #Erstelle Startregel und füge sie dem ersten Itemset hinzu
     def initializeParser(self):
         tempSet = Itemset()
         for group in self.grammar.regeln.values():
