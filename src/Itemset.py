@@ -19,7 +19,8 @@ class Itemset():
     def hasItem(self, other):
         for item in self.itemSet:
             if(item.regel == other.regel):
+                print("Hallo")
                 return True
-            else:
-                return False
+        else:
+            return False
             
