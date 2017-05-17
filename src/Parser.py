@@ -98,6 +98,11 @@ class Parser():
             for item2 in currentItemSet.itemSet: 
                 if item.regel.leftSide == item2.regel.rightSide and item2.dot+1 == len(item2.regel.rightSide):
                     tempItem = Item(item2.regel, item.dot + 1, position)
+                elif item.regel.leftSide == item2.regel.rightSide and item2.dot+1 < len(item2.regel.rightSide):
+                    tempItem = Item(item2.regel, item.dot + 1, position)
+                    tempSet = Itemset()
+                    tempSet.addItem(tempItem)
+                    self.itemSetLists.append(tempSet)
                 if tempItem != None and self.completedSetLists[position].hasItem(tempItem) == False:
                     self.completedSetLists[position].addItem(tempItem)
         
