@@ -15,5 +15,11 @@ class Itemset():
     def __repr__(self):
         for item in self.itemSet:
             print(item.__repr__())
-        
-        
+    
+    def hasItem(self, other):
+        for item in self.itemSet:
+            if(item.regel == other.regel):
+                return True
+            else:
+                return False
+            
