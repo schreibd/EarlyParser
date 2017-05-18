@@ -78,13 +78,13 @@ class Parser():
                     tempSet = Itemset().addItem(tempItem)
                     self.itemSetLists.append(tempSet)
                     
-    
+    #Scan Methode geht bei zweitem Symbol/Durchlauf nicht in if Fälle rein
     def scan(self, currentItemSet, position):
         symbol = self.sentence[position+1]
         for item in self.itemSetLists[position].itemSet:
             if item.regel.rightSide == symbol:
                 tempItem = Item(item.regel, item.dot + 1, position)
-                if self.completedSetLists  and self.completedSetLists[position] != None: 
+                if self.completedSetLists  and self.completedSetLists[position] != None:
                     self.completedSetLists[position].addItem(tempItem)
                 else:
                     tempSet = Itemset()
@@ -102,10 +102,25 @@ class Parser():
                     if self.completedSetLists[position].hasItem(tempItem) == False:
                         self.completedSetLists[position].addItem(tempItem)
                 elif item2.dot+1 < len(item2.regel.rightSide) and item.regel.leftSide == item2.regel.rightSide[item2.dot]:
-                    tempItem = Item(item2.regel, item2.dot + 1, position+1)
-                    tempSet = Itemset()
-                    tempSet.addItem(tempItem)
-                    self.itemSetLists.append(tempSet)
+                    tempItem = Item(item2.regel, item2.dot + 1, position)
+                    if len(self.itemSetLists) <= position+1:
+                        tempSet = Itemset()
+                        tempSet.addItem(tempItem)
+                        self.itemSetLists.append(tempSet)
+                    elif self.itemSetLists[position+1].hasItem(tempItem) == False:
+                        self.itemSetLists[position+1].addItem(tempItem)
+                    
+                    
+                        
+                        
+                        
+                    #if len(self.itemSetLists) < position+1:
+                        #if self.itemSetLists[position+1].hasItem(tempItem) == False:
+                            #self.itemSetLists[position+1].addItem(tempItem)
+                    #else:
+                        #tempSet = Itemset()
+                        #tempSet.addItem(tempItem)
+                        #self.itemSetLists.append(tempSet)
         #for item in self.completedSetLists[position].itemSet:
             #tempItem = None
             #for item2 in currentItemSet.itemSet: 
