@@ -24,7 +24,7 @@ class Parser():
         for itemSet in self.completedSetLists:
             itemSet.__repr__()   
     
-    #Erstelle Startregel und füge sie dem ersten Itemset hinzu
+    #Erstelle Startregel und fï¿½ge sie dem ersten Itemset hinzu
     def initializeParser(self):
         tempSet = Itemset()
         for group in self.grammar.regeln.values():
@@ -47,13 +47,15 @@ class Parser():
                 length = len(currentItemSet.itemSet)
             #print("Old length: " + str(oldLength) + " Length: " + str(length))
             self.scan(currentItemSet, counter)
-            completedLength = len(self.completedSetLists[counter].itemSet)
+            if counter < len(self.completedSetLists):
+                completedLength = len(self.completedSetLists[counter].itemSet)
+            else:
+                completedLength = 0
             #print(str(completedLength))
             
             oCompletedLength = 0
             while oCompletedLength < int(completedLength):
                 self.complete(currentItemSet, counter)
-                print("Old length: " + str(oCompletedLength) + " Length: " + str(completedLength))
                 oCompletedLength = completedLength
                 completedLength = len(self.completedSetLists[counter].itemSet)
             counter += 1    
@@ -95,7 +97,6 @@ class Parser():
         for item in self.completedSetLists[position].itemSet:
             tempItem = None
             for item2 in currentItemSet.itemSet: 
-                print(item2.dot+1 < len(item2.regel.rightSide))
                 if item.regel.leftSide == item2.regel.rightSide and item2.dot+1 == len(item2.regel.rightSide):
                     tempItem = Item(item2.regel, item2.dot + 1, position)
                     if self.completedSetLists[position].hasItem(tempItem) == False:
@@ -105,8 +106,6 @@ class Parser():
                     tempSet = Itemset()
                     tempSet.addItem(tempItem)
                     self.itemSetLists.append(tempSet)
-                
-        
         #for item in self.completedSetLists[position].itemSet:
             #tempItem = None
             #for item2 in currentItemSet.itemSet: 

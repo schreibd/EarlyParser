@@ -1,4 +1,4 @@
-'''
+﻿'''
 Created on 13.05.2017
 
 @author: Daniel
@@ -21,6 +21,6 @@ class Item():
         '''
     def __repr__(self):
         rechteSeite = list(self.regel.rightSide)
-        rechteSeite.insert(self.dot, "�")
+        rechteSeite.insert(self.dot, "●")
         rechteSeite.insert(rechteSeite.__len__(), "@"+str(self.start))
         return "Regel {0} -> {1}".format(self.regel.leftSide, ' '.join(rechteSeite))

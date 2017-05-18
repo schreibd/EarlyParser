@@ -18,10 +18,8 @@ class Grammatik(object):
     def addRegel(self, regel):
         if regel.leftSide in self.regeln:
             self.regeln[regel.leftSide].append(regel)
-            print("Regel wurde zu bestehender Regel hinzugefügt")
         else: 
             self.regeln[regel.leftSide] = [regel]
-            print("Neue Regel hinzugefügt")
         
     
     def __repr__(self):
