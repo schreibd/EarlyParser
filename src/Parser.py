@@ -19,8 +19,10 @@ class Parser():
         #Liste der Itemsets (completed)
         self.completedSetLists = []     
     def __repr__(self):
+        print("itemSet:")
         for itemSet in self.itemSetLists:
             itemSet.__repr__()
+        print("completedSet:")
         for itemSet in self.completedSetLists:
             itemSet.__repr__()   
     
@@ -36,7 +38,9 @@ class Parser():
     
     def parseLoop(self):
         counter = 0
+        print(str(self.letterCount))
         while counter < self.letterCount:
+            #print(str(counter))
             currentItemSet = self.itemSetLists[counter]
             length = len(currentItemSet.itemSet)
             oldLength = 0
@@ -69,10 +73,13 @@ class Parser():
                     #if item.regel.rightSide == rule.rightSide and item.regel.leftSide == rule.leftSide:
                         tempItem = None
                         break
-                    if rule.leftSide == item.regel.rightSide:
+                    #Greife hier nicht komplette Regel ab sondern nur das Zeichen nach dem Punkt (?)
+                    if rule.leftSide == item.regel.rightSide[item.dot]:
                         tempItem = Item(rule, 0, position)
+                    #if rule.leftSide == item.regel.rightSide:
+                        #tempItem = Item(rule, 0, position)
+                        #print(tempItem.__repr__())
                 if tempItem != None and self.itemSetLists[position] != None:
-                    
                     self.itemSetLists[position].addItem(tempItem)   
                 elif tempItem != None:
                     tempSet = Itemset().addItem(tempItem)
@@ -84,7 +91,9 @@ class Parser():
         for item in self.itemSetLists[position].itemSet:
             if item.regel.rightSide == symbol:
                 tempItem = Item(item.regel, item.dot + 1, position)
-                if self.completedSetLists  and self.completedSetLists[position] != None:
+                #Hier ist ein Fehler
+                if position < len(self.completedSetLists) and self.completedSetLists:
+                #if self.completedSetLists  and self.completedSetLists[position] != None:
                     self.completedSetLists[position].addItem(tempItem)
                 else:
                     tempSet = Itemset()
@@ -96,13 +105,18 @@ class Parser():
     def complete(self, currentItemSet, position):
         for item in self.completedSetLists[position].itemSet:
             tempItem = None
+            if item.start < position:
+                currentItemSet = self.itemSetLists[item.start]
             for item2 in currentItemSet.itemSet: 
-                if item.regel.leftSide == item2.regel.rightSide and item2.dot+1 == len(item2.regel.rightSide):
-                    tempItem = Item(item2.regel, item2.dot + 1, position)
+                #if position == 2:
+                   # print(item.__repr__())
+                if item.regel.leftSide == item2.regel.rightSide[item2.dot] and item2.dot+1 == len(item2.regel.rightSide):
+                    tempItem = Item(item2.regel, item2.dot + 1, item2.start)
+                    #tempItem = Item(item2.regel, item2.dot + 1, position)
                     if self.completedSetLists[position].hasItem(tempItem) == False:
                         self.completedSetLists[position].addItem(tempItem)
                 elif item2.dot+1 < len(item2.regel.rightSide) and item.regel.leftSide == item2.regel.rightSide[item2.dot]:
-                    tempItem = Item(item2.regel, item2.dot + 1, position)
+                    tempItem = Item(item2.regel, item2.dot + 1, item2.start)
                     if len(self.itemSetLists) <= position+1:
                         tempSet = Itemset()
                         tempSet.addItem(tempItem)
