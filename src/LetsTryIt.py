@@ -23,4 +23,6 @@ class LetsTryIt(object):
     def compare(self):
         if self.name == None:
             print("Ja kann man")
-        
+            
+    def isUper(self):
+        return self.name.isupper()
