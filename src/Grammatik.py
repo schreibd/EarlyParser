@@ -11,7 +11,7 @@ class Grammatik(object):
     
     def addRegel(self, regel):
         #Wenn Linke Seite einer Regel bereits als Key im Dictionary vorhanden ist, 
-        #fuege  dem Key die Rechte Seite der Regel als Objekt hinzu
+        #fuege  dem Key die Rechte Seite der Regel als Object hinzu
         if regel.leftSide in self.regeln:
             self.regeln[regel.leftSide].append(regel)
         else: 
@@ -23,3 +23,10 @@ class Grammatik(object):
             for regel in group:
                 result = regel.__repr__()
                 print(result)
+                
+    def hasSymbol(self, symbol):
+        for group in self.regeln.values():
+            for regel in group:
+                if symbol == regel.rightSide:
+                    return True
+        return False

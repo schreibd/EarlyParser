@@ -7,17 +7,15 @@ from Itemset import*
 
 class Parser():
     
-    #START_SYMBOL = "StartStart"
     
     def __init__(self, grammar, sentence):
         self.grammar = grammar
         self.sentence = sentence[:0] + " " + sentence[0:]
         
         self.letterCount = len(self.sentence) - self.sentence.count(' ') 
-        print(str(self.letterCount))
         
         #Liste der Itemsets (active und prediction werden hier zusammengefasst (Konzept nach Fachliteratur))
-        self.itemSetLists = []
+        self.actPredSets = []
         #Liste der Itemsets (completed)
         self.completedSetLists = []
         
@@ -26,16 +24,15 @@ class Parser():
     
     
     def __repr__(self):
-        
         cSetLists = 0
-        for itemSet in self.itemSetLists:
-            print("itemSet: " + str(cSetLists))
+        for itemSet in self.actPredSets:
+            print("Active/Predicted Set: " + str(cSetLists))
             itemSet.__repr__()
             cSetLists += 1
         
         cCompletedsetLists = 0
         for itemSet in self.completedSetLists:
-            print("completedSet: " + str(cCompletedsetLists))
+            print("Completed Set: " + str(cCompletedsetLists))
             itemSet.__repr__()   
             cCompletedsetLists += 1
     
@@ -44,19 +41,25 @@ class Parser():
         tempSet = Itemset()
         for group in self.grammar.regeln.values():
             for rule in group:
-                if rule.leftSide == "S":
+                if rule.leftSide == "S" and len(self.actPredSets) == 0:
                     tempItem = Item(rule)
                     tempSet.addItem(tempItem)
-                    self.itemSetLists.append(tempSet)   
+                    self.actPredSets.append(tempSet)   
+                elif rule.leftSide == "S":
+                    tempItem = Item(rule)
+                    self.actPredSets[0].addItem(tempItem)
     
     #Main-Loop der durch den Eingabesatz iteriert
     def parseLoop(self):
         counter = 0
         while counter < self.letterCount:
+            if counter < len(self.actPredSets):
+                currentItemSet = self.actPredSets[counter]
+            else:
+                self.parseFound(False, None)
             
-            currentItemSet = self.itemSetLists[counter]
             
-            length = len(currentItemSet.itemSet)
+            length = len(currentItemSet.itemList)
             oldLength = 0
             
             #Rufe Predictor so oft auf, bis sich Groesse des aktuell betrachteten 
@@ -64,17 +67,16 @@ class Parser():
             while oldLength < int(length):  
                 self.predict(currentItemSet, counter)
                 oldLength = length
-                length = len(currentItemSet.itemSet)
+                length = len(currentItemSet.itemList)
                 
             #Rufe Scanner auf 
             self.scan(counter)
             
             
             if counter < len(self.completedSetLists):
-                completedLength = len(self.completedSetLists[counter].itemSet)
+                completedLength = len(self.completedSetLists[counter].itemList)
             else:
                 completedLength = 0
-        
             oCompletedLength = 0
             
             #Rufe Completor so oft auf, bis sich die Groesse des aktuell betrachteten 
@@ -82,32 +84,37 @@ class Parser():
             while oCompletedLength < int(completedLength):
                 self.complete(currentItemSet, counter)
                 oCompletedLength = completedLength
-                completedLength = len(self.completedSetLists[counter].itemSet)
+                completedLength = len(self.completedSetLists[counter].itemList)
                 
-            counter += 1   
-        self.validate() 
+            counter += 1 
+        for item in self.completedSetLists[len(self.completedSetLists)-1].itemList:
+            if item.regel.leftSide == "S" and item.start == 0:
+                self.parseFound(True, None)
+        self.parseFound(False, None)  
+        
     
     #Predictor zum vorhersagen von Regeln
+    #    dieser sucht nach Items, in welchen der Punkt vor einem NonTerminal zu finden ist
     def predict(self, currentItemSet, position):
         for group in self.grammar.regeln.values():  
             for rule in group:
                 tempItem = None
-                for item in currentItemSet.itemSet:
+                for item in currentItemSet.itemList:
                     #Falls Item bereits enthalten
                     if rule == item.regel:
                         tempItem = None
                         break
                     
-                    #Greife hier nicht komplette Regel auf rechter Seite ab sondern nur das Zeichen nach dem Punkt
+                    #Greif hier nicht komplette Regel auf rechter Seite ab sondern nur das Zeichen nach dem Punkt
                     if rule.leftSide == item.regel.rightSide[item.dot]:
                         tempItem = Item(rule, 0, position)
                         
-                if tempItem != None and self.itemSetLists[position] != None:
-                    self.itemSetLists[position].addItem(tempItem)   
+                if tempItem != None and self.actPredSets[position] != None:
+                    self.actPredSets[position].addItem(tempItem)   
                     
                 elif tempItem != None:
                     tempSet = Itemset().addItem(tempItem)
-                    self.itemSetLists.append(tempSet)
+                    self.actPredSets.append(tempSet)
                     
 
     def scan(self, position):
@@ -115,98 +122,54 @@ class Parser():
         #Aktuell zu betrachtendes Terminal im String
         symbol = self.sentence[position+1]
         
+        if self.grammar.hasSymbol(symbol):
         #Laeuft über aktuelles Itemset und sucht nach Terminal
         #Bei Erkennen eines Terminals wird es im aktuellen completedSet gespeichert
-        for item in self.itemSetLists[position].itemSet:
-            if item.regel.rightSide == symbol:
+            for item in self.actPredSets[position].itemList:
+                if item.regel.rightSide == symbol:
                 
-                tempItem = Item(item.regel, item.dot + 1, position)
+                    tempItem = Item(item.regel, item.dot + 1, position)
                 
-                if position < len(self.completedSetLists) and self.completedSetLists:
-                    self.completedSetLists[position].addItem(tempItem)
+                    if position < len(self.completedSetLists) and self.completedSetLists:
+                        self.completedSetLists[position].addItem(tempItem)
                 
-                else:
-                    tempSet = Itemset()
-                    tempSet.addItem(tempItem)
-                    self.completedSetLists.append(tempSet)
+                    else:
+                        tempSet = Itemset()
+                        tempSet.addItem(tempItem)
+                        self.completedSetLists.append(tempSet)
+        else:
+            self.parseFound(False, None)
+        
     
     
     #Füllt completedSetlist an der Stelle p 
-    #Oder setList an der Stelle p+1 falls noch weitere Symbole erkannt werden müssen
+    #Oder actPredSets an der Stelle p+1 falls noch weitere Symbole erkannt werden müssen
     def complete(self, currentItemSet, position):
-        for item in self.completedSetLists[position].itemSet:
+        for completedItem in self.completedSetLists[position].itemList:
             tempItem = None
-            if item.start < position:
-                currentItemSet = self.itemSetLists[item.start]
-            for item2 in currentItemSet.itemSet: 
-                if item.regel.leftSide == item2.regel.rightSide[item2.dot] and item2.dot+1 == len(item2.regel.rightSide):
-                    tempItem = Item(item2.regel, item2.dot + 1, item2.start)
-                    #tempItem = Item(item2.regel, item2.dot + 1, position)
+            if completedItem.start < position:
+                currentItemSet = self.actPredSets[completedItem.start]
+            for item in currentItemSet.itemList: 
+                if completedItem.regel.leftSide == item.regel.rightSide[item.dot] and item.dot+1 == len(item.regel.rightSide):
+                    tempItem = Item(item.regel, item.dot + 1, item.start)
                     if self.completedSetLists[position].hasItem(tempItem) == False:
                         self.completedSetLists[position].addItem(tempItem)
-                elif item2.dot+1 < len(item2.regel.rightSide) and item.regel.leftSide == item2.regel.rightSide[item2.dot]:
-                    tempItem = Item(item2.regel, item2.dot + 1, item2.start)
-                    if len(self.itemSetLists) <= position+1:
+                elif item.dot+1 < len(item.regel.rightSide) and completedItem.regel.leftSide == item.regel.rightSide[item.dot]:
+                    tempItem = Item(item.regel, item.dot + 1, item.start)
+                    if len(self.actPredSets) <= position+1:
                         tempSet = Itemset()
                         tempSet.addItem(tempItem)
-                        self.itemSetLists.append(tempSet)
-                    elif self.itemSetLists[position+1].hasItem(tempItem) == False:
-                        self.itemSetLists[position+1].addItem(tempItem)
+                        self.actPredSets.append(tempSet)
+                    elif self.actPredSets[position+1].hasItem(tempItem) == False:
+                        self.actPredSets[position+1].addItem(tempItem)
     
-    def validate(self):
-        for item in self.completedSetLists[self.letterCount-1].itemSet:
-            if item.regel.leftSide == "S":
-                i = self.letterCount - 1
-                j = 0
-                b = Itemset()
-                b.addItem(item)
-                self.ungerParse(i, j, b)
-            #else:
-                #self.parseFound(False)
     
     def parseFound(self, result, tree):
+        self.__repr__()
         if result:
             print("Gültiger Parse gefunden")
-            for item in tree: 
-                item.__repr__()
-                sys.exit(0)
+            sys.exit(0)
         else:
             print("Kein gültiger Parse gefunden")
             sys.exit(1)
-                    
-    def ungerParse(self, i, j, tree):
-        while i > 0:
-            dot = tree.itemSet[j].dot 
-            if tree.itemSet[j].regel.rightSide[dot-1].isupper():
-                wj = tree.itemSet[j].regel.rightSide[dot-1]
-                #print(tree.itemSet[j].__repr__())
-                kj = tree.itemSet[j].start 
-                pj = dot                
-                for item in self.completedSetLists[i].itemSet:
-                    wItem = item.regel.leftSide
-                    kItem = item.start
-                    pItem = item.dot
-                    if wj == wItem:
-                        if (pj-1 == 0 and kItem==kj) or (pj-1 > 0 and kItem-kj >= pj-1):
-                            if tree.hasItem(item) == False:
-                                tempItem = Item(item.regel, item.dot, item.start)
-                                #print(tempItem.__repr__())
-                                tree.addItem(tempItem)
-                                #tree.__repr__()
-                                self.ungerParse(i, j+1, tree)
-                                tree.itemSet.remove(tree.itemSet[len(tree.itemSet)-1])
-                return
-            symbol = tree.itemSet[j].regel.rightSide[tree.itemSet[j].dot-1]
-            #print(symbol)
-            if symbol.islower() or symbol == "+" or symbol == "-":
-                if tree.itemSet[j].regel.rightSide[tree.itemSet[j].dot-1] == self.sentence[i+1]:
-                    tree.itemSet[j].dot -= 1
-                    i -=1
-            if tree.itemSet[j].dot == 0:
-                j -= 1
-                tree.itemSet[j].dot -= 1
-            if tree.itemSet[j] == self.itemSetLists[0].itemSet[0]:
-                self.parseFound(True, tree)
-            
-                        
-                    
+    
